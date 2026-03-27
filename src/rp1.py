@@ -268,6 +268,7 @@ class RP1:
         print(f"  {self.get_text('cmd_color')}")
         print(f"  {self.get_text('cmd_lang')}")
         print(f"  {self.get_text('cmd_config')}")
+        print(f"  reload - reload with new settings")
         print(f"  {self.get_text('cmd_exit')}")
 
     def cmd_color(self):
@@ -344,6 +345,11 @@ class RP1:
             if cmd == "config":
                 self.cmd_config()
                 continue
+
+            if cmd in ["reload", "refresh"]:
+                print("\033[2J\033[H", end="")
+                print(f"{C}[system]{R} reloading...")
+                os.execv(sys.executable, [sys.executable, __file__])
 
             if not user_input.strip():
                 continue
