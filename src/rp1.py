@@ -188,8 +188,10 @@ class TTS:
         self.enabled = False
         self.mode = mode
         self.engine = None
+        self.language = "es"
 
-    def init_engine(self):
+    def init_engine(self, lang="es"):
+        self.language = lang
         try:
             import pyttsx3
             self.engine = pyttsx3.init()
@@ -197,10 +199,22 @@ class TTS:
                 self.engine.setProperty('rate', 130)
                 self.engine.setProperty('pitch', 0.7)
             voices = self.engine.getProperty('voices')
-            for voice in voices:
-                if 'spanish' in voice.name.lower() or 'es' in voice.name.lower():
-                    self.engine.setProperty('voice', voice.id)
-                    break
+            if lang == "en":
+                for voice in voices:
+                    if 'english' in voice.name.lower() or 'en' in voice.name.lower():
+                        if 'us' in voice.name.lower() or 'uk' in voice.name.lower() or 'english' in voice.name.lower():
+                            self.engine.setProperty('voice', voice.id)
+                            break
+                if not self.engine._inLoop:
+                    for voice in voices:
+                        if 'english' in voice.name.lower():
+                            self.engine.setProperty('voice', voice.id)
+                            break
+            else:
+                for voice in voices:
+                    if 'spanish' in voice.name.lower() or 'es' in voice.name.lower():
+                        self.engine.setProperty('voice', voice.id)
+                        break
         except:
             pass
 
@@ -223,7 +237,7 @@ class RP1:
     def __init__(self, config):
         self.config = config
         self.tts = TTS("retro")
-        self.tts.init_engine()
+        self.tts.init_engine(config.language)
         self.conversation_history = []
 
     def get_color(self):
@@ -280,6 +294,7 @@ class RP1:
             print(f"  {key}: {val['name']}")
         new_lang = input(f"{C}lang > {R}").strip().lower()
         if self.config.set_language(new_lang):
+            self.tts.init_engine(new_lang)
             print(f"{C}rp1: {R}{self.get_text('lang_changed')} {LANGUAGES[new_lang]['name']}")
         else:
             print(f"{C}rp1: {R}{self.get_text('lang_invalid')}")
