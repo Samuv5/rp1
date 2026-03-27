@@ -48,6 +48,7 @@ rp1
 | `color` | Change robot color |
 | `lang` | Change language |
 | `config` | Show current settings |
+| `reload` | Reload RP1 with new settings |
 | `exit` | Exit RP1 |
 
 ## Requirements
