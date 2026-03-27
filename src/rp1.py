@@ -136,8 +136,9 @@ TEXTS = {
         "config_lang": "language:",
         "thinking": "rp1: thinking...",
         "error": "[error]",
-        "closing": "rp1: closing session... bye!",
+        "closing": "closing session... bye!",
         "sistema": "[system]",
+        "reloading": "[system] reloading",
         "model": "model:",
         "voice_status": "voice:",
         "not_found": "model not found. run 'rp1 --setup' first.",
@@ -248,82 +249,145 @@ class RP1:
     def show_banner(self):
         C = self.get_color()
         R = "\033[0m"
-        print(f"{C}========================================={R}")
-        print(f"{C}  RP1 - Digital Companion{R}")
-        print(f"{C}========================================={R}")
-        print(f"{C}{self.get_text('sistema')}{R} {self.get_text('model')} {OLLAMA_MODEL}")
+        W = "\033[1;37m"
+        print()
+        print(f"{C}╔{'═' * 41}╗{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}║{'  🤖  R P 1  -  D i g i t a l  C o m p a n i o n':^41}║{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}╚{'═' * 41}╝{R}")
+        print()
+        print(f"{C}┌─ {W}INFO{R}{C} ─{'─' * 33}┐{R}")
+        print(f"{C}│{R}  📦 {self.get_text('model')} {OLLAMA_MODEL}")
+        voice_icon = "🔊" if self.tts.enabled else "🔇"
         voice_status = self.get_text('voz_on') if self.tts.enabled else self.get_text('voz_off')
-        print(f"{C}{self.get_text('sistema')}{R} {self.get_text('voice_status')} {voice_status}")
-        print(f"{C}{self.get_text('sistema')}{R} {self.get_text('config_color')} {COLORS[self.config.color]['label']}")
-        print(f"{C}{self.get_text('sistema')}{R} {self.get_text('config_lang')} {LANGUAGES[self.config.language]['name']}")
-        print(f"{C}{self.get_text('sistema')}{R} type 'help' for commands")
+        print(f"{C}│{R}  {voice_icon} {self.get_text('voice_status')} {voice_status}")
+        print(f"{C}│{R}  🎨 {self.get_text('config_color')} {COLORS[self.config.color]['label']}")
+        print(f"{C}│{R}  🌐 {self.get_text('config_lang')} {LANGUAGES[self.config.language]['name']}")
+        print(f"{C}│{R}  💡 type 'help' for commands")
+        print(f"{C}└{'─' * 40}┘{R}")
         print()
         print(f"{C}rp1: {R}{self.get_text('welcome')}")
 
     def show_help(self):
         C = self.get_color()
         R = "\033[0m"
-        print(f"{C}{self.get_text('help_title')}{R}")
-        print(f"  {self.get_text('cmd_voz')}")
-        print(f"  {self.get_text('cmd_color')}")
-        print(f"  {self.get_text('cmd_lang')}")
-        print(f"  {self.get_text('cmd_config')}")
-        print(f"  reload - reload with new settings")
-        print(f"  {self.get_text('cmd_exit')}")
+        W = "\033[1;37m"
+        print()
+        print(f"{C}╔{'═' * 41}╗{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}║{'       📋  C O M M A N D S            '[:41]:^41}║{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}╚{'═' * 41}╝{R}")
+        print()
+        print(f"{C}┌─ {W}COMMANDS{R}{C} ─{'─' * 27}┐{R}")
+        print(f"{C}│{R}  🔊 voice   - {self.get_text('cmd_voz')}")
+        print(f"{C}│{R}  🎨 color   - {self.get_text('cmd_color')}")
+        print(f"{C}│{R}  🌐 lang    - {self.get_text('cmd_lang')}")
+        print(f"{C}│{R}  ⚙️  config  - {self.get_text('cmd_config')}")
+        print(f"{C}│{R}  🔄 reload  - reload with new settings")
+        print(f"{C}│{R}  🚪 exit    - {self.get_text('cmd_exit')}")
+        print(f"{C}└{'─' * 40}┘{R}")
 
     def cmd_color(self):
         C = self.get_color()
         R = "\033[0m"
-        print(f"{C}{self.get_text('color_prompt')}{R}")
+        W = "\033[1;37m"
+        print()
+        print(f"{C}╔{'═' * 41}╗{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}║{'        🎨  C H O O S E  C O L O R      '[:41]:^41}║{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}╚{'═' * 41}╝{R}")
+        print()
+        print(f"{C}┌─ {W}COLORS{R}{C} ─{'─' * 29}┐{R}")
+        color_emojis = {"yellow": "🟡", "red": "🔴", "blue": "🔵", "green": "🟢", "pink": "🩷", "cyan": "🔵"}
         for key, val in COLORS.items():
-            print(f"  {key}: {val['label']}")
-        new_color = input(f"{C}color > {R}").strip().lower()
+            emoji = color_emojis.get(key, "⚪")
+            current = " ← current" if key == self.config.color else ""
+            print(f"{C}│{R}  {emoji} {key:8} - {val['label']}{current}")
+        print(f"{C}└{'─' * 40}┘{R}")
+        print()
+        new_color = input(f"{C}🎨 color > {R}").strip().lower()
         if self.config.set_color(new_color):
-            print(f"{C}rp1: {R}{self.get_text('color_changed')} {COLORS[new_color]['label']}")
+            emoji = color_emojis.get(new_color, "⚪")
+            print(f"{C}│{R}  {emoji} {self.get_text('color_changed')} {COLORS[new_color]['label']}")
         else:
-            print(f"{C}rp1: {R}{self.get_text('color_invalid')}")
+            print(f"{C}│{R}  ❌ {self.get_text('color_invalid')}")
 
     def cmd_lang(self):
         C = self.get_color()
         R = "\033[0m"
-        print(f"{C}{self.get_text('lang_prompt')}{R}")
+        W = "\033[1;37m"
+        print()
+        print(f"{C}╔{'═' * 41}╗{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}║{'       🌐  C H O O S E  L A N G      '[:41]:^41}║{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}╚{'═' * 41}╝{R}")
+        print()
+        print(f"{C}┌─ {W}LANGUAGES{R}{C} ─{'─' * 25}┐{R}")
+        lang_emojis = {"es": "🇲🇽", "en": "🇺🇸"}
         for key, val in LANGUAGES.items():
-            print(f"  {key}: {val['name']}")
-        new_lang = input(f"{C}lang > {R}").strip().lower()
+            emoji = lang_emojis.get(key, "🌐")
+            current = " ← current" if key == self.config.language else ""
+            print(f"{C}│{R}  {emoji} {key:8} - {val['name']}{current}")
+        print(f"{C}└{'─' * 40}┘{R}")
+        print()
+        new_lang = input(f"{C}🌐 lang > {R}").strip().lower()
         if self.config.set_language(new_lang):
             self.tts.init_engine(new_lang)
-            print(f"{C}rp1: {R}{self.get_text('lang_changed')} {LANGUAGES[new_lang]['name']}")
+            emoji = lang_emojis.get(new_lang, "🌐")
+            print(f"{C}│{R}  {emoji} {self.get_text('lang_changed')} {LANGUAGES[new_lang]['name']}")
         else:
-            print(f"{C}rp1: {R}{self.get_text('lang_invalid')}")
+            print(f"{C}│{R}  ❌ {self.get_text('lang_invalid')}")
 
     def cmd_config(self):
         C = self.get_color()
         R = "\033[0m"
-        print(f"{C}{self.get_text('config_title')}{R}")
-        print(f"  {self.get_text('config_color')} {COLORS[self.config.color]['label']}")
-        print(f"  {self.get_text('config_lang')} {LANGUAGES[self.config.language]['name']}")
+        W = "\033[1;37m"
+        color_emojis = {"yellow": "🟡", "red": "🔴", "blue": "🔵", "green": "🟢", "pink": "🩷", "cyan": "🔵"}
+        lang_emojis = {"es": "🇲🇽", "en": "🇺🇸"}
+        print()
+        print(f"{C}╔{'═' * 41}╗{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}║{'      ⚙️  C U R R E N T  C O N F I G   '[:41]:^41}║{R}")
+        print(f"{C}║{W:^41}║{R}")
+        print(f"{C}╚{'═' * 41}╝{R}")
+        print()
+        print(f"{C}┌─ {W}CONFIGURATION{R}{C} ─{'─' * 22}┐{R}")
+        print(f"{C}│{R}  🎨 {self.get_text('config_color')} {color_emojis.get(self.config.color, '⚪')} {COLORS[self.config.color]['label']}")
+        print(f"{C}│{R}  🌐 {self.get_text('config_lang')} {lang_emojis.get(self.config.language, '🌐')} {LANGUAGES[self.config.language]['name']}")
+        voice = "🔊 ON" if self.tts.enabled else "🔇 OFF"
+        print(f"{C}│{R}  🔊 Voice     {voice}")
+        print(f"{C}│{R}  📦 Model     {OLLAMA_MODEL}")
+        print(f"{C}└{'─' * 40}┘{R}")
 
-    def chat(self):
+    def get_prompt(self):
         C = self.get_color()
         R = "\033[0m"
+        voice_icon = "🔊" if self.tts.enabled else ""
+        return f"{C}rp1 {voice_icon}> {R}"
+
+    def chat(self):
         self.show_banner()
 
         while True:
             try:
-                user_input = input(f"{C}{self.get_text('tu')}{R}")
+                user_input = input(self.get_prompt())
             except EOFError:
                 break
 
             cmd = user_input.strip().lower()
 
             if cmd in ["exit", "salir", "quit"]:
-                print(f"{C}rp1: {R}{self.get_text('closing')}")
+                print(f"{self.get_prompt()}{self.get_text('closing')}")
                 break
 
             if cmd in ["voz", "voice"]:
                 enabled = self.tts.toggle()
                 msg = self.get_text('voz_on') if enabled else self.get_text('voz_off')
-                print(f"{C}{self.get_text('sistema')}{R} {msg}")
+                print(f"{self.get_prompt()}{msg}")
                 continue
 
             if cmd in ["ayuda", "help"]:
@@ -348,14 +412,14 @@ class RP1:
 
             if cmd in ["reload", "refresh"]:
                 print("\033[2J\033[H", end="")
-                print(f"{C}[system]{R} reloading...")
+                print(f"{self.get_prompt()}{self.get_text('reloading')}...")
                 os.execv(sys.executable, [sys.executable, __file__])
 
             if not user_input.strip():
                 continue
 
             self.conversation_history.append(f"user: {user_input}")
-            print(f"{C}{self.get_text('thinking')}{R}", end=" ", flush=True)
+            print(f"{self.get_color()}{self.get_text('thinking')}\033[0m", end=" ", flush=True)
 
             try:
                 history = "\n".join(self.conversation_history[-5:])
@@ -372,17 +436,17 @@ class RP1:
                 self.conversation_history.append(f"rp1: {response}")
 
                 print("\r" + " " * 25 + "\r", end="")
-                print(f"{C}{self.get_text('rp1_prefix')}{R}{response}")
+                print(f"{self.get_prompt()}{response}")
 
                 if self.tts.enabled:
                     self.tts.speak(response)
 
             except subprocess.TimeoutExpired:
                 print("\r" + " " * 25 + "\r", end="")
-                print(f"{C}{self.get_text('error')}{R} timeout")
+                print(f"{self.get_color()}{self.get_text('error')}\033[0m timeout")
             except Exception as e:
                 print("\r" + " " * 25 + "\r", end="")
-                print(f"{C}{self.get_text('error')}{R} {e}")
+                print(f"{self.get_color()}{self.get_text('error')}\033[0m {e}")
 
 
 def check_ollama():
