@@ -36,14 +36,14 @@
 | **OS** | Linux / macOS / Windows | Linux / macOS / Windows |
 | **Python** | 3.8+ | 3.8+ |
 | **RAM** | 4 GB | 2 GB |
-| **Disk** | 2 GB free | 500 MB |
+| **Disk** | 5 GB free (for ai model) | 500 MB |
 | **GPU** | Optional (recommended for local) | Not required |
 
 ### For Local AI (Ollama)
 
 - **RAM**: 4GB minimum (8GB recommended)
 - **GPU**: NVIDIA GPU with CUDA (optional, but recommended)
-- **Disk**: 2GB for models
+- **Disk**: 5GB for models
 
 ### For Cloud AI (API)
 
