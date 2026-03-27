@@ -1,21 +1,39 @@
-# RP1 - Digital Companion
+# 🤖 RP1 - Digital Companion
 
-RP1 is an old-school 90s style digital companion chatbot. Think of it as a talking Tamagotchi or a Windows 95 PC with personality.
+<p align="center">
+  <img src="assets/banner.png" alt="RP1 Banner" width="600"/>
+</p>
 
-## Features
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/License-GPL--3.0-green.svg" alt="License">
+  <img src="https://img.shields.io/badge/AI-Model-gemma3:4b-orange.svg" alt="Model">
+</p>
 
-- Retro 90s chatbot personality
-- Text-to-speech voice support
-- Customizable colors (Yellow, Red, Blue, Green, Pink, Cyan)
-- Bilingual support (English/Spanish)
-- Uses Ollama with gemma3:4b model
-- Persistent configuration
+> **RP1** es un compañero digital estilo años 90. ¡Como un Tamagotchi parlante o una PC con Windows 95 con personalidad!
 
-## Installation
+---
 
-### Linux / Mac
+## ✨ Características
+
+| Feature | Description |
+|---------|-------------|
+| 🎨 **Colores Personalizables** | Amarillo, Rojo, Azul, Verde, Rosa, Cian |
+| 🌐 **Bilingüe** | Español e Inglés |
+| 🔊 **Voz TTS** | Text-to-speech con pyttsx3 |
+| 💾 **Configuración Persistente** | Se guarda en `~/.rp1/config.json` |
+| 🤖 **IA Local** | Usa Ollama con gemma3:4b |
+| 🖥️ **Multiplataforma** | Linux, Mac, Windows |
+
+---
+
+## 🚀 Instalación
+
+### Linux / macOS
 
 ```bash
+git clone https://github.com/Samuv5/rp1.git
+cd rp1
 chmod +x install.sh
 ./install.sh
 ```
@@ -23,44 +41,88 @@ chmod +x install.sh
 ### Windows
 
 ```batch
+git clone https://github.com/Samuv5/rp1.git
+cd rp1
 install.bat
 ```
 
-## Usage
+### 📦 Descarga Directa
+
+Descarga el AppImage desde [Releases](https://github.com/Samuv5/rp1/releases):
+
+```bash
+chmod +x RP1.AppImage
+./RP1.AppImage
+```
+
+---
+
+## 📖 Uso
 
 ```bash
 rp1
 ```
 
-### Options
+### Opciones de Inicio
 
-| Command | Description |
+| Comando | Descripción |
 |---------|-------------|
-| `rp1 --voice` | Start with voice enabled |
-| `rp1 --setup` | Download gemma3:4b model manually |
+| `rp1 --voice` | Iniciar con voz activada |
+| `rp1 --setup` | Descargar modelo gemma3:4b manualmente |
 
-### In-App Commands
+### Comandos Internos
 
-| Command | Description |
+| Comando | Descripción |
 |---------|-------------|
-| `help` | Show available commands |
-| `voice` | Toggle voice on/off |
-| `color` | Change robot color |
-| `lang` | Change language |
-| `config` | Show current settings |
-| `reload` | Reload RP1 with new settings |
-| `exit` | Exit RP1 |
+| `help` 📋 | Mostrar comandos disponibles |
+| `voice` 🔊 | Activar/desactivar voz |
+| `color` 🎨 | Cambiar color del robot |
+| `lang` 🌐 | Cambiar idioma (es/en) |
+| `config` ⚙️ | Ver configuración actual |
+| `reload` 🔄 | Recargar con nueva configuración |
+| `exit` 🚪 | Salir de RP1 |
 
-## Requirements
+---
 
-- Python 3.8+
-- Ollama
-- gemma3:4b model
-- pyttsx3 (for voice)
+## 🎮 Colores Disponibles
 
-## Configuration
+```
+┌─────────────────────────────────────┐
+│  🟡 Yellow   🔴 Red    🔵 Blue     │
+│  🟢 Green    🩷 Pink   🔵 Cyan     │
+└─────────────────────────────────────┘
+```
 
-Config is stored in `~/.rp1/config.json`:
+---
+
+## 🌐 Idiomas
+
+| Código | Idioma |
+|--------|--------|
+| `es` | Español 🇲🇽 🇪🇸 |
+| `en` | English 🇺🇸 🇬🇧 |
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+RP1/
+├── src/
+│   └── rp1.py          # Código fuente
+├── install.sh          # Instalador Linux/Mac
+├── install.bat         # Instalador Windows
+├── RP1.AppImage        # AppImage portable
+├── README.md           # Documentación
+├── LICENSE             # GPL-3.0
+└── requirements.txt    # Dependencias Python
+```
+
+---
+
+## ⚙️ Configuración
+
+La configuración se guarda en `~/.rp1/config.json`:
 
 ```json
 {
@@ -69,10 +131,68 @@ Config is stored in `~/.rp1/config.json`:
 }
 ```
 
-## License
+---
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+## 📋 Requisitos
 
-## Author
+- 🐍 Python 3.8+
+- 🤖 Ollama
+- 📦 Modelo gemma3:4b
+- 🔊 pyttsx3 (para voz)
 
-Samuv5
+---
+
+## 📸 Screenshots
+
+<details>
+<summary>Haz clic para ver screenshots</summary>
+
+### Banner de Inicio
+```
+=========================================
+  🤖 RP1 - Digital Companion
+=========================================
+[system] modelo: gemma3:4b
+[system] voz: desactivada
+[system] color: Yellow
+[system] idioma: Español
+
+rp1: soy rp1, un companero digital antiguo...
+```
+
+### Cambiando Color
+```
+color > cyan
+
+=========================================
+  🤖 RP1 - Digital Companion
+=========================================
+[system] modelo: gemma3:4b
+[system] voz: desactivada
+[system] color: Cyan
+[system] idioma: Español
+
+rp1: color cambiado a Cyan
+```
+
+</details>
+
+---
+
+## 📜 Licencia
+
+Este proyecto está bajo la licencia **GNU General Public License v3.0**
+
+Ver [LICENSE](LICENSE) para más detalles.
+
+---
+
+## 👤 Autor
+
+**Samuv5** - [GitHub](https://github.com/Samuv5)
+
+---
+
+<p align="center">
+  🤖 Hecho con ❤️ y Python
+</p>
