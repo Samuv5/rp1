@@ -331,10 +331,14 @@ class RP1:
 
             if cmd == "color":
                 self.cmd_color()
+                print()
+                self.show_banner()
                 continue
 
             if cmd in ["lang", "language", "idioma"]:
                 self.cmd_lang()
+                print()
+                self.show_banner()
                 continue
 
             if cmd == "config":
