@@ -10,24 +10,24 @@
   <img src="https://img.shields.io/badge/AI-Model-gemma3:4b-orange.svg" alt="Model">
 </p>
 
-> **RP1** es un compañero digital estilo años 90. ¡Como un Tamagotchi parlante o una PC con Windows 95 con personalidad!
+> **RP1** is an old-school 90s digital companion. Like a talking Tamagotchi or a Windows 95 PC with personality!
 
 ---
 
-## ✨ Características
+## ✨ Features
 
 | Feature | Description |
 |---------|-------------|
-| 🎨 **Colores Personalizables** | Amarillo, Rojo, Azul, Verde, Rosa, Cian |
-| 🌐 **Bilingüe** | Español e Inglés |
-| 🔊 **Voz TTS** | Text-to-speech con pyttsx3 |
-| 💾 **Configuración Persistente** | Se guarda en `~/.rp1/config.json` |
-| 🤖 **IA Local** | Usa Ollama con gemma3:4b |
-| 🖥️ **Multiplataforma** | Linux, Mac, Windows |
+| 🎨 **Customizable Colors** | Yellow, Red, Blue, Green, Pink, Cyan |
+| 🌐 **Bilingual** | Spanish and English |
+| 🔊 **TTS Voice** | Text-to-speech with pyttsx3 |
+| 💾 **Persistent Config** | Saved in `~/.rp1/config.json` |
+| 🤖 **Local AI** | Uses Ollama with gemma3:4b |
+| 🖥️ **Cross-Platform** | Linux, Mac, Windows |
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
 ### Linux / macOS
 
@@ -46,9 +46,9 @@ cd rp1
 install.bat
 ```
 
-### 📦 Descarga Directa
+### 📦 Direct Download
 
-Descarga el AppImage desde [Releases](https://github.com/Samuv5/rp1/releases):
+Download the AppImage from [Releases](https://github.com/Samuv5/rp1/releases):
 
 ```bash
 chmod +x RP1.AppImage
@@ -57,34 +57,34 @@ chmod +x RP1.AppImage
 
 ---
 
-## 📖 Uso
+## 📖 Usage
 
 ```bash
 rp1
 ```
 
-### Opciones de Inicio
+### Startup Options
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `rp1 --voice` | Iniciar con voz activada |
-| `rp1 --setup` | Descargar modelo gemma3:4b manualmente |
+| `rp1 --voice` | Start with voice enabled |
+| `rp1 --setup` | Download gemma3:4b model manually |
 
-### Comandos Internos
+### In-App Commands
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `help` 📋 | Mostrar comandos disponibles |
-| `voice` 🔊 | Activar/desactivar voz |
-| `color` 🎨 | Cambiar color del robot |
-| `lang` 🌐 | Cambiar idioma (es/en) |
-| `config` ⚙️ | Ver configuración actual |
-| `reload` 🔄 | Recargar con nueva configuración |
-| `exit` 🚪 | Salir de RP1 |
+| `help` 📋 | Show available commands |
+| `voice` 🔊 | Toggle voice on/off |
+| `color` 🎨 | Change robot color |
+| `lang` 🌐 | Change language (es/en) |
+| `config` ⚙️ | Show current settings |
+| `reload` 🔄 | Reload with new settings |
+| `exit` 🚪 | Exit RP1 |
 
 ---
 
-## 🎮 Colores Disponibles
+## 🎮 Available Colors
 
 ```
 ┌─────────────────────────────────────┐
@@ -95,104 +95,104 @@ rp1
 
 ---
 
-## 🌐 Idiomas
+## 🌐 Languages
 
-| Código | Idioma |
-|--------|--------|
-| `es` | Español 🇲🇽 🇪🇸 |
+| Code | Language |
+|------|----------|
+| `es` | Spanish 🇲🇽 🇪🇸 |
 | `en` | English 🇺🇸 🇬🇧 |
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 RP1/
 ├── src/
-│   └── rp1.py          # Código fuente
-├── install.sh          # Instalador Linux/Mac
-├── install.bat         # Instalador Windows
-├── RP1.AppImage        # AppImage portable
-├── README.md           # Documentación
+│   └── rp1.py          # Source code
+├── install.sh           # Linux/Mac installer
+├── install.bat          # Windows installer
+├── RP1.AppImage        # Portable AppImage
+├── README.md           # Documentation
 ├── LICENSE             # GPL-3.0
-└── requirements.txt    # Dependencias Python
+└── requirements.txt    # Python dependencies
 ```
 
 ---
 
-## ⚙️ Configuración
+## ⚙️ Configuration
 
-La configuración se guarda en `~/.rp1/config.json`:
+Config is saved in `~/.rp1/config.json`:
 
 ```json
 {
   "color": "yellow",
-  "language": "es"
+  "language": "en"
 }
 ```
 
 ---
 
-## 📋 Requisitos
+## 📋 Requirements
 
 - 🐍 Python 3.8+
 - 🤖 Ollama
-- 📦 Modelo gemma3:4b
-- 🔊 pyttsx3 (para voz)
+- 📦 gemma3:4b model
+- 🔊 pyttsx3 (for voice)
 
 ---
 
 ## 📸 Screenshots
 
 <details>
-<summary>Haz clic para ver screenshots</summary>
+<summary>Click to see screenshots</summary>
 
-### Banner de Inicio
+### Startup Banner
 ```
 =========================================
   🤖 RP1 - Digital Companion
 =========================================
-[system] modelo: gemma3:4b
-[system] voz: desactivada
+[system] model: gemma3:4b
+[system] voice: disabled
 [system] color: Yellow
-[system] idioma: Español
+[system] language: English
 
-rp1: soy rp1, un companero digital antiguo...
+rp1: im rp1, an old digital companion...
 ```
 
-### Cambiando Color
+### Changing Color
 ```
 color > cyan
 
 =========================================
   🤖 RP1 - Digital Companion
 =========================================
-[system] modelo: gemma3:4b
-[system] voz: desactivada
+[system] model: gemma3:4b
+[system] voice: disabled
 [system] color: Cyan
-[system] idioma: Español
+[system] language: English
 
-rp1: color cambiado a Cyan
+rp1: color changed to Cyan
 ```
 
 </details>
 
 ---
 
-## 📜 Licencia
+## 📜 License
 
-Este proyecto está bajo la licencia **GNU General Public License v3.0**
+This project is under the **GNU General Public License v3.0**
 
-Ver [LICENSE](LICENSE) para más detalles.
+See [LICENSE](LICENSE) for details.
 
 ---
 
-## 👤 Autor
+## 👤 Author
 
 **Samuv5** - [GitHub](https://github.com/Samuv5)
 
 ---
 
 <p align="center">
-  🤖 Hecho con ❤️ y Python
+  🤖 Made with ❤️ and Python
 </p>
