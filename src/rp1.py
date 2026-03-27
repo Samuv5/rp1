@@ -195,22 +195,18 @@ class TTS:
         try:
             import pyttsx3
             self.engine = pyttsx3.init()
-            if self.mode == "retro":
-                self.engine.setProperty('rate', 130)
-                self.engine.setProperty('pitch', 0.7)
             voices = self.engine.getProperty('voices')
             if lang == "en":
+                self.engine.setProperty('rate', 160)
+                self.engine.setProperty('pitch', 0.5)
                 for voice in voices:
-                    if 'english' in voice.name.lower() or 'en' in voice.name.lower():
-                        if 'us' in voice.name.lower() or 'uk' in voice.name.lower() or 'english' in voice.name.lower():
-                            self.engine.setProperty('voice', voice.id)
-                            break
-                if not self.engine._inLoop:
-                    for voice in voices:
-                        if 'english' in voice.name.lower():
-                            self.engine.setProperty('voice', voice.id)
-                            break
+                    if 'english' in voice.name.lower():
+                        self.engine.setProperty('voice', voice.id)
+                        break
             else:
+                if self.mode == "retro":
+                    self.engine.setProperty('rate', 130)
+                    self.engine.setProperty('pitch', 0.7)
                 for voice in voices:
                     if 'spanish' in voice.name.lower() or 'es' in voice.name.lower():
                         self.engine.setProperty('voice', voice.id)
