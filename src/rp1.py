@@ -10,6 +10,8 @@ OLLAMA_MODEL = "gemma3:4b"
 
 CONFIG_DIR = Path.home() / ".rp1"
 CONFIG_FILE = CONFIG_DIR / "config.json"
+AI_CONFIG_FILE = CONFIG_DIR / "ai_config.json"
+API_CONFIG_FILE = CONFIG_DIR / "api_config.json"
 
 COLORS = {
     "yellow": {"name": "\033[1;33m", "label": "Yellow"},
@@ -21,7 +23,7 @@ COLORS = {
 }
 
 LANGUAGES = {
-    "es": {"name": "Español", "prompt": "system_es"},
+    "es": {"name": "Espanol", "prompt": "system_es"},
     "en": {"name": "English", "prompt": "system_en"},
 }
 
@@ -87,12 +89,11 @@ TEXTS = {
     "es": {
         "welcome": "soy rp1, un companero digital antiguo. tengo un tamagochi llamado bits. como estas?",
         "help_title": "comandos disponibles:",
-        "cmd_voz": "voz   - activar/desactivar voz",
-        "cmd_color": "color - cambiar color del robot",
-        "cmd_lang": "lang   - cambiar idioma",
-        "cmd_config": "config - ver configuracion actual",
-        "cmd_exit": "exit  - salir",
-        "cmd_ayuda": "ayuda - mostrar comandos",
+        "cmd_voz": "activar/desactivar voz",
+        "cmd_color": "cambiar color del robot",
+        "cmd_lang": "cambiar idioma",
+        "cmd_config": "ver configuracion actual",
+        "cmd_exit": "salir",
         "voz_on": "voz activada",
         "voz_off": "voz desactivada",
         "color_changed": "color cambiado a",
@@ -106,23 +107,21 @@ TEXTS = {
         "config_lang": "idioma:",
         "thinking": "rp1: pensando...",
         "error": "[error]",
-        "closing": "rp1: cerrando sesion... hasta luego!",
-        "sistema": "[sistema]",
+        "closing": "cerrando sesion... hasta luego!",
+        "reloading": "[sistema] recargando...",
         "model": "modelo:",
-        "voice_status": "voz:",
-        "not_found": "modelo no encontrado. ejecuta 'rp1 --setup' primero.",
-        "tu": "tu > ",
-        "rp1_prefix": "rp1: ",
+        "ai_mode": "modo IA:",
+        "local": "local (Ollama)",
+        "cloud": "nube (API)",
     },
     "en": {
         "welcome": "im rp1, an old digital companion. i have a tamagotchi named bits. how are you?",
         "help_title": "available commands:",
-        "cmd_voz": "voice - toggle voice on/off",
-        "cmd_color": "color - change robot color",
-        "cmd_lang": "lang   - change language",
-        "cmd_config": "config - show current settings",
-        "cmd_exit": "exit  - exit rp1",
-        "cmd_ayuda": "help  - show commands",
+        "cmd_voz": "toggle voice on/off",
+        "cmd_color": "change robot color",
+        "cmd_lang": "change language",
+        "cmd_config": "show current settings",
+        "cmd_exit": "exit rp1",
         "voz_on": "voice enabled",
         "voz_off": "voice disabled",
         "color_changed": "color changed to",
@@ -137,13 +136,11 @@ TEXTS = {
         "thinking": "rp1: thinking...",
         "error": "[error]",
         "closing": "closing session... bye!",
-        "sistema": "[system]",
-        "reloading": "[system] reloading",
+        "reloading": "[system] reloading...",
         "model": "model:",
-        "voice_status": "voice:",
-        "not_found": "model not found. run 'rp1 --setup' first.",
-        "tu": "you > ",
-        "rp1_prefix": "rp1: ",
+        "ai_mode": "AI mode:",
+        "local": "local (Ollama)",
+        "cloud": "cloud (API)",
     },
 }
 
@@ -182,6 +179,76 @@ class Config:
             self.save()
             return True
         return False
+
+
+class AIProvider:
+    def __init__(self):
+        self.mode = "local"
+        self.provider = None
+        self.api_key = None
+        self.load()
+
+    def load(self):
+        if AI_CONFIG_FILE.exists():
+            try:
+                with open(AI_CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                    self.mode = data.get("ai_mode", "local")
+            except:
+                pass
+        if API_CONFIG_FILE.exists():
+            try:
+                with open(API_CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                    self.provider = data.get("provider")
+                    self.api_key = data.get("api_key")
+            except:
+                pass
+
+    def chat_local(self, prompt):
+        try:
+            result = subprocess.run(
+                ["curl", "-s", "http://localhost:11434/api/generate",
+                 "-d", json.dumps({"model": OLLAMA_MODEL, "prompt": prompt, "stream": False})],
+                capture_output=True, text=True, timeout=120
+            )
+            data = json.loads(result.stdout)
+            return data.get("response", "sin respuesta")
+        except Exception as e:
+            return f"error: {e}"
+
+    def chat_openai(self, prompt):
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=self.api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"error: {e}"
+
+    def chat_anthropic(self, prompt):
+        try:
+            from anthropic import Anthropic
+            client = Anthropic(api_key=self.api_key)
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=100,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
+        except Exception as e:
+            return f"error: {e}"
+
+    def chat(self, prompt):
+        if self.mode == "cloud":
+            if self.provider == "openai":
+                return self.chat_openai(prompt)
+            elif self.provider == "anthropic":
+                return self.chat_anthropic(prompt)
+        return self.chat_local(prompt)
 
 
 class TTS:
@@ -231,8 +298,9 @@ class TTS:
 
 
 class RP1:
-    def __init__(self, config):
+    def __init__(self, config, ai_provider):
         self.config = config
+        self.ai = ai_provider
         self.tts = TTS("retro")
         self.tts.init_engine(config.language)
         self.conversation_history = []
@@ -249,20 +317,23 @@ class RP1:
     def show_banner(self):
         C = self.get_color()
         R = "\033[0m"
+        ai_mode = self.get_text('local') if self.ai.mode == "local" else self.get_text('cloud')
+        model_name = OLLAMA_MODEL if self.ai.mode == "local" else self.ai.provider
         print()
-        print(f"{C}╭───────────────────────────────────────╮{R}")
-        print(f"{C}│          🤖 RP1 Digital Companion     │{R}")
-        print(f"{C}╰───────────────────────────────────────╯{R}")
+        print(f"{C}╭{'─' * 41}╮{R}")
+        print(f"{C}│{' 🤖 RP1 - Digital Companion ':^41}│{R}")
+        print(f"{C}╰{'─' * 41}╯{R}")
         print()
-        print(f"{C}┌─ INFO ─────────────────────────────┐{R}")
-        print(f"{C}│{R}  📦 Model: {OLLAMA_MODEL}")
+        print(f"{C}┌─ INFO {'─' * 31}┐{R}")
+        print(f"{C}│{R}  📦 {self.get_text('model')} {model_name}")
         voice_icon = "🔊" if self.tts.enabled else "🔇"
         voice_status = self.get_text('voz_on') if self.tts.enabled else self.get_text('voz_off')
         print(f"{C}│{R}  {voice_icon} Voice: {voice_status}")
-        print(f"{C}│{R}  🎨 Color: {COLORS[self.config.color]['label']}")
-        print(f"{C}│{R}  🌐 Lang: {LANGUAGES[self.config.language]['name']}")
+        print(f"{C}│{R}  🎨 {self.get_text('config_color')} {COLORS[self.config.color]['label']}")
+        print(f"{C}│{R}  🌐 {self.get_text('config_lang')} {LANGUAGES[self.config.language]['name']}")
+        print(f"{C}│{R}  🤖 {self.get_text('ai_mode')} {ai_mode}")
         print(f"{C}│{R}  💡 type 'help' for commands")
-        print(f"{C}└──────────────────────────────────────┘{R}")
+        print(f"{C}└{'─' * 40}┘{R}")
         print()
         print(f"{C}rp1: {R}{self.get_text('welcome')}")
 
@@ -270,34 +341,34 @@ class RP1:
         C = self.get_color()
         R = "\033[0m"
         print()
-        print(f"{C}╭───────────────────────────────────────╮{R}")
-        print(f"{C}│           📋 COMMANDS                │{R}")
-        print(f"{C}╰───────────────────────────────────────╯{R}")
+        print(f"{C}╭{'─' * 41}╮{R}")
+        print(f"{C}│{' 📋 COMMANDS ':^41}│{R}")
+        print(f"{C}╰{'─' * 41}╯{R}")
         print()
-        print(f"{C}┌─ COMMANDS ──────────────────────────┐{R}")
+        print(f"{C}┌─ COMMANDS {'─' * 26}┐{R}")
         print(f"{C}│{R}  🔊 voice  - {self.get_text('cmd_voz')}")
         print(f"{C}│{R}  🎨 color  - {self.get_text('cmd_color')}")
         print(f"{C}│{R}  🌐 lang   - {self.get_text('cmd_lang')}")
         print(f"{C}│{R}  ⚙️  config - {self.get_text('cmd_config')}")
         print(f"{C}│{R}  🔄 reload - reload with new settings")
         print(f"{C}│{R}  🚪 exit   - {self.get_text('cmd_exit')}")
-        print(f"{C}└──────────────────────────────────────┘{R}")
+        print(f"{C}└{'─' * 40}┘{R}")
 
     def cmd_color(self):
         C = self.get_color()
         R = "\033[0m"
         print()
-        print(f"{C}╭───────────────────────────────────────╮{R}")
-        print(f"{C}│           🎨 CHOOSE COLOR              │{R}")
-        print(f"{C}╰───────────────────────────────────────╯{R}")
+        print(f"{C}╭{'─' * 41}╮{R}")
+        print(f"{C}│{' 🎨 CHOOSE COLOR ':^41}│{R}")
+        print(f"{C}╰{'─' * 41}╯{R}")
         print()
-        print(f"{C}┌─ COLORS ──────────────────────────────┐{R}")
+        print(f"{C}┌─ COLORS {'─' * 29}┐{R}")
         color_emojis = {"yellow": "🟡", "red": "🔴", "blue": "🔵", "green": "🟢", "pink": "🩷", "cyan": "🔵"}
         for key, val in COLORS.items():
             emoji = color_emojis.get(key, "⚪")
             current = " (current)" if key == self.config.color else ""
             print(f"{C}│{R}  {emoji} {key:8} - {val['label']}{current}")
-        print(f"{C}└──────────────────────────────────────┘{R}")
+        print(f"{C}└{'─' * 40}┘{R}")
         print()
         new_color = input(f"{C}🎨 color > {R}").strip().lower()
         if self.config.set_color(new_color):
@@ -310,17 +381,17 @@ class RP1:
         C = self.get_color()
         R = "\033[0m"
         print()
-        print(f"{C}╭───────────────────────────────────────╮{R}")
-        print(f"{C}│           🌐 CHOOSE LANGUAGE          │{R}")
-        print(f"{C}╰───────────────────────────────────────╯{R}")
+        print(f"{C}╭{'─' * 41}╮{R}")
+        print(f"{C}│{' 🌐 CHOOSE LANGUAGE ':^41}│{R}")
+        print(f"{C}╰{'─' * 41}╯{R}")
         print()
-        print(f"{C}┌─ LANGUAGES ──────────────────────────┐{R}")
+        print(f"{C}┌─ LANGUAGES {'─' * 26}┐{R}")
         lang_emojis = {"es": "🇲🇽", "en": "🇺🇸"}
         for key, val in LANGUAGES.items():
             emoji = lang_emojis.get(key, "🌐")
             current = " (current)" if key == self.config.language else ""
             print(f"{C}│{R}  {emoji} {key:8} - {val['name']}{current}")
-        print(f"{C}└──────────────────────────────────────┘{R}")
+        print(f"{C}└{'─' * 40}┘{R}")
         print()
         new_lang = input(f"{C}🌐 lang > {R}").strip().lower()
         if self.config.set_language(new_lang):
@@ -335,18 +406,19 @@ class RP1:
         R = "\033[0m"
         color_emojis = {"yellow": "🟡", "red": "🔴", "blue": "🔵", "green": "🟢", "pink": "🩷", "cyan": "🔵"}
         lang_emojis = {"es": "🇲🇽", "en": "🇺🇸"}
+        ai_mode = self.get_text('local') if self.ai.mode == "local" else self.get_text('cloud')
         print()
-        print(f"{C}╭───────────────────────────────────────╮{R}")
-        print(f"{C}│        ⚙️ CURRENT CONFIGURATION        │{R}")
-        print(f"{C}╰───────────────────────────────────────╯{R}")
+        print(f"{C}╭{'─' * 41}╮{R}")
+        print(f"{C}│{' ⚙️ CURRENT CONFIG ':^41}│{R}")
+        print(f"{C}╰{'─' * 41}╯{R}")
         print()
-        print(f"{C}┌─ CONFIGURATION ───────────────────────┐{R}")
+        print(f"{C}┌─ CONFIGURATION {'─' * 22}┐{R}")
         print(f"{C}│{R}  🎨 Color: {color_emojis.get(self.config.color, '⚪')} {COLORS[self.config.color]['label']}")
         print(f"{C}│{R}  🌐 Lang:  {lang_emojis.get(self.config.language, '🌐')} {LANGUAGES[self.config.language]['name']}")
         voice = "🔊 ON" if self.tts.enabled else "🔇 OFF"
         print(f"{C}│{R}  🔊 Voice: {voice}")
-        print(f"{C}│{R}  📦 Model: {OLLAMA_MODEL}")
-        print(f"{C}└──────────────────────────────────────┘{R}")
+        print(f"{C}│{R}  🤖 AI:    {ai_mode}")
+        print(f"{C}└{'─' * 40}┘{R}")
 
     def get_prompt(self):
         C = self.get_color()
@@ -409,17 +481,8 @@ class RP1:
             try:
                 history = "\n".join(self.conversation_history[-5:])
                 full_prompt = f"{self.get_system_prompt()}\n\n{history}\nrp1:"
-
-                result = subprocess.run(
-                    ["curl", "-s", "http://localhost:11434/api/generate",
-                     "-d", json.dumps({"model": OLLAMA_MODEL, "prompt": full_prompt, "stream": False})],
-                    capture_output=True, text=True, timeout=120
-                )
-                data = json.loads(result.stdout)
-                response = data.get("response", "sin respuesta")
-
+                response = self.ai.chat(full_prompt)
                 self.conversation_history.append(f"rp1: {response}")
-
                 print("\r" + " " * 25 + "\r", end="")
                 print(f"{self.get_prompt()}{response}")
 
@@ -438,12 +501,21 @@ def check_ollama():
     try:
         result = subprocess.run(["curl", "-s", "http://localhost:11434"], capture_output=True, timeout=5)
         if result.returncode != 0:
-            print("[error] Ollama is not running. Start it with: ollama serve")
             return False
     except:
-        print("[error] Ollama is not running. Start it with: ollama serve")
         return False
     return True
+
+
+def check_api_config():
+    if API_CONFIG_FILE.exists():
+        try:
+            with open(API_CONFIG_FILE, "r") as f:
+                data = json.load(f)
+                return bool(data.get("api_key"))
+        except:
+            pass
+    return False
 
 
 def setup_model():
@@ -462,11 +534,19 @@ def main():
         setup_model()
         return
 
-    if not check_ollama():
+    config = Config()
+    ai_provider = AIProvider()
+
+    if ai_provider.mode == "local" and not check_ollama():
+        print("[error] Ollama is not running. Start it with: ollama serve")
+        print("Or use cloud mode with: rp1 --cloud")
         sys.exit(1)
 
-    config = Config()
-    rp1 = RP1(config)
+    if ai_provider.mode == "cloud" and not check_api_config():
+        print("[error] API not configured. Run install.sh again.")
+        sys.exit(1)
+
+    rp1 = RP1(config, ai_provider)
     rp1.tts.enabled = args.voice
     rp1.chat()
 

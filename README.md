@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/License-GPL--3.0-green.svg" alt="License">
-  <img src="https://img.shields.io/badge/AI-Model-gemma3:4b-orange.svg" alt="Model">
+  <img src="https://img.shields.io/badge/AI-Local%20%7C%20Cloud-blue.svg" alt="AI">
 </p>
 
 > **RP1** is an old-school 90s digital companion. Like a talking Tamagotchi or a Windows 95 PC with personality!
@@ -21,9 +21,34 @@
 | 🎨 **Customizable Colors** | Yellow, Red, Blue, Green, Pink, Cyan |
 | 🌐 **Bilingual** | Spanish and English |
 | 🔊 **TTS Voice** | Text-to-speech with pyttsx3 |
+| 🤖 **AI Modes** | Local (Ollama) or Cloud (API Keys) |
 | 💾 **Persistent Config** | Saved in `~/.rp1/config.json` |
-| 🤖 **Local AI** | Uses Ollama with gemma3:4b |
 | 🖥️ **Cross-Platform** | Linux, Mac, Windows |
+
+---
+
+## 📋 System Requirements
+
+### Minimum Requirements
+
+| Component | Local AI | Cloud AI |
+|-----------|----------|----------|
+| **OS** | Linux / macOS / Windows | Linux / macOS / Windows |
+| **Python** | 3.8+ | 3.8+ |
+| **RAM** | 4 GB | 2 GB |
+| **Disk** | 2 GB free | 500 MB |
+| **GPU** | Optional (recommended for local) | Not required |
+
+### For Local AI (Ollama)
+
+- **RAM**: 4GB minimum (8GB recommended)
+- **GPU**: NVIDIA GPU with CUDA (optional, but recommended)
+- **Disk**: 2GB for models
+
+### For Cloud AI (API)
+
+- **OpenAI API Key** or **Anthropic API Key**
+- Internet connection
 
 ---
 
@@ -57,6 +82,24 @@ chmod +x RP1.AppImage
 
 ---
 
+## 🤖 AI Setup Options
+
+During installation, choose your AI mode:
+
+### 1. Local (Ollama) - FREE
+- Uses local models (gemma3:4b)
+- No internet required
+- Private (all data stays on your machine)
+- Requires more RAM
+
+### 2. Cloud (API Key) - Pay per use
+- **OpenAI** - GPT-4o Mini
+- **Anthropic** - Claude 3.5 Sonnet
+- Requires internet
+- Lower resource usage
+
+---
+
 ## 📖 Usage
 
 ```bash
@@ -68,7 +111,7 @@ rp1
 | Command | Description |
 |---------|-------------|
 | `rp1 --voice` | Start with voice enabled |
-| `rp1 --setup` | Download gemma3:4b model manually |
+| `rp1 --setup` | Download Ollama models (local mode only) |
 
 ### In-App Commands
 
@@ -122,23 +165,34 @@ RP1/
 
 ## ⚙️ Configuration
 
-Config is saved in `~/.rp1/config.json`:
+Config files are saved in `~/.rp1/`:
 
-```json
-{
-  "color": "yellow",
-  "language": "en"
-}
+```bash
+~/.rp1/config.json     # UI settings (color, language)
+~/.rp1/ai_config.json # AI mode (local/cloud)
+~/.rp1/api_config.json # API keys (if cloud mode)
 ```
 
 ---
 
 ## 📋 Requirements
 
+### For All Modes
+
 - 🐍 Python 3.8+
+- 🔊 pyttsx3 (for voice)
+- 🌐 Internet (for cloud mode)
+
+### For Local AI Mode
+
 - 🤖 Ollama
 - 📦 gemma3:4b model
-- 🔊 pyttsx3 (for voice)
+- 💾 4GB+ RAM
+
+### For Cloud AI Mode
+
+- 🔑 OpenAI API Key OR
+- 🔑 Anthropic API Key
 
 ---
 
@@ -149,30 +203,36 @@ Config is saved in `~/.rp1/config.json`:
 
 ### Startup Banner
 ```
-=========================================
-  🤖 RP1 - Digital Companion
-=========================================
-[system] model: gemma3:4b
-[system] voice: disabled
-[system] color: Yellow
-[system] language: English
+╭─────────────────────────────────────────────╮
+│          🤖 RP1 - Digital Companion          │
+╰─────────────────────────────────────────────╯
+
+┌─ INFO ────────────────────────────────┐
+│  📦 Model: gemma3:4b
+│  🔇 Voice: disabled
+│  🎨 Color: Yellow
+│  🌐 Lang: English
+│  🤖 AI: local (Ollama)
+│  💡 type 'help' for commands
+└──────────────────────────────────────┘
 
 rp1: im rp1, an old digital companion...
 ```
 
-### Changing Color
+### Help Menu
 ```
-color > cyan
+╭─────────────────────────────────────────────╮
+│              📋 COMMANDS                   │
+╰─────────────────────────────────────────────╯
 
-=========================================
-  🤖 RP1 - Digital Companion
-=========================================
-[system] model: gemma3:4b
-[system] voice: disabled
-[system] color: Cyan
-[system] language: English
-
-rp1: color changed to Cyan
+┌─ COMMANDS ────────────────────────────┐
+│  🔊 voice  - toggle voice on/off
+│  🎨 color  - change robot color
+│  🌐 lang   - change language
+│  ⚙️  config - show current settings
+│  🔄 reload - reload with new settings
+│  🚪 exit   - exit rp1
+└──────────────────────────────────────┘
 ```
 
 </details>

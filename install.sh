@@ -13,20 +13,52 @@ YELLOW='\033[1;33m'
 CYAN='\033[1;36m'
 NC='\033[0m'
 
-echo -e "${CYAN}========================================${NC}"
-echo -e "${CYAN}  RP1 Installer - Linux/Mac${NC}"
-echo -e "${CYAN}========================================${NC}"
+echo ""
+echo -e "${CYAN}╔═══════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║         RP1 Digital Companion Installer      ║${NC}"
+echo -e "${CYAN}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
 
 select_language() {
-    echo "Select your language / Selecciona tu idioma:"
+    echo "Select language / Selecciona idioma:"
     echo "  1) English"
     echo "  2) Espanol"
-    read -p "Choice / Opcion [1-2]: " choice
+    read -p "Choice: " choice
     case $choice in
         1) INSTALL_LANG="en";;
         2) INSTALL_LANG="es";;
         *) INSTALL_LANG="en";;
+    esac
+}
+
+select_ai_mode() {
+    echo ""
+    echo "Select AI Mode:"
+    echo "  1) Local (Ollama) - Free, uses local models"
+    echo "  2) Cloud (API Key) - OpenAI or Anthropic"
+    read -p "Choice [1-2]: " choice
+    case $choice in
+        1) AI_MODE="local";;
+        2) AI_MODE="cloud";;
+        *) AI_MODE="local";;
+    esac
+}
+
+get_api_key() {
+    echo ""
+    echo "Select Cloud Provider:"
+    echo "  1) OpenAI (GPT-4o Mini)"
+    echo "  2) Anthropic (Claude 3.5 Sonnet)"
+    read -p "Choice [1-2]: " provider
+    case $provider in
+        1) 
+            read -p "Enter OpenAI API Key: " API_KEY
+            echo "{\"provider\": \"openai\", \"api_key\": \"$API_KEY\"}" > "${INSTALL_DIR}/api_config.json"
+            ;;
+        2) 
+            read -p "Enter Anthropic API Key: " API_KEY
+            echo "{\"provider\": \"anthropic\", \"api_key\": \"$API_KEY\"}" > "${INSTALL_DIR}/api_config.json"
+            ;;
     esac
 }
 
@@ -41,7 +73,7 @@ fi
 
 if [ "$INSTALL_LANG" = "es" ]; then
     MSG_PYTHON="Verificando Python..."
-    MSG_PYTHON_OK="Python encontrado"
+    MSG_PYTHON_OK="Python 3.8+ encontrado"
     MSG_PYTHON_ERR="Python 3.8+ es requerido"
     MSG_VENV="Creando entorno virtual..."
     MSG_VENV_OK="Entorno virtual creado"
@@ -59,7 +91,7 @@ if [ "$INSTALL_LANG" = "es" ]; then
     MSG_RUN="Para ejecutar RP1, escribe: rp1"
 else
     MSG_PYTHON="Checking Python..."
-    MSG_PYTHON_OK="Python found"
+    MSG_PYTHON_OK="Python 3.8+ found"
     MSG_PYTHON_ERR="Python 3.8+ is required"
     MSG_VENV="Creating virtual environment..."
     MSG_VENV_OK="Virtual environment created"
@@ -81,7 +113,7 @@ echo -e "${YELLOW}${MSG_PYTHON}${NC}"
 
 if ! command -v python3 &> /dev/null; then
     echo -e "${RED}${MSG_PYTHON_ERR}${NC}"
-    echo "Install Python: sudo apt install python3 python3-pip python3-venv"
+    echo "Install: sudo apt install python3 python3-pip python3-venv"
     exit 1
 fi
 
@@ -104,30 +136,37 @@ echo ""
 
 echo -e "${YELLOW}${MSG_DEP}${NC}"
 "$VENV_DIR/bin/pip" install --upgrade pip
-"$VENV_DIR/bin/pip" install pyttsx3
+"$VENV_DIR/bin/pip" install pyttsx3 openai anthropic
 echo -e "${GREEN}${MSG_DEP_OK}${NC}"
-echo ""
 
-echo -e "${YELLOW}${MSG_OLLAMA}${NC}"
-if ! command -v ollama &> /dev/null; then
-    if [ "$(uname)" = "Darwin" ]; then
-        brew install ollama
-    else
-        curl -fsSL https://ollama.com/install.sh | sh
+select_ai_mode
+
+if [ "$AI_MODE" = "local" ]; then
+    echo ""
+    echo -e "${YELLOW}${MSG_OLLAMA}${NC}"
+    if ! command -v ollama &> /dev/null; then
+        if [ "$(uname)" = "Darwin" ]; then
+            brew install ollama
+        else
+            curl -fsSL https://ollama.com/install.sh | sh
+        fi
     fi
+    if ! pgrep -x "ollama" > /dev/null; then
+        nohup ollama serve > /dev/null 2>&1 &
+        sleep 2
+    fi
+    echo -e "${GREEN}${MSG_OLLAMA_OK}${NC}"
+    echo ""
+    echo -e "${YELLOW}${MSG_DOWNLOAD}${NC}"
+    ollama pull gemma3:4b
+    echo -e "${GREEN}${MSG_DOWNLOAD_OK}${NC}"
+    echo "{\"ai_mode\": \"local\"}" > "${INSTALL_DIR}/ai_config.json"
+else
+    get_api_key
+    echo "{\"ai_mode\": \"cloud\"}" > "${INSTALL_DIR}/ai_config.json"
 fi
-if ! pgrep -x "ollama" > /dev/null; then
-    nohup ollama serve > /dev/null 2>&1 &
-    sleep 2
-fi
-echo -e "${GREEN}${MSG_OLLAMA_OK}${NC}"
-echo ""
 
-echo -e "${YELLOW}${MSG_DOWNLOAD}${NC}"
-ollama pull gemma3:4b
-echo -e "${GREEN}${MSG_DOWNLOAD_OK}${NC}"
 echo ""
-
 echo -e "${YELLOW}${MSG_COPY}${NC}"
 mkdir -p "$BIN_DIR"
 cp "$(dirname "$0")/src/rp1.py" "$INSTALL_DIR/"
@@ -138,7 +177,6 @@ python3 "$HOME/.rp1/rp1.py" "$@"
 RP1SCRIPT
 chmod +x "$BIN_DIR/rp1"
 echo -e "${GREEN}${MSG_COPY_OK}${NC}"
-echo ""
 
 if [ -f "${HOME}/.bashrc" ]; then
     if ! grep -q "\.local/bin" "${HOME}/.bashrc"; then
@@ -153,21 +191,16 @@ fi
 
 echo "{\"color\": \"yellow\", \"language\": \"$INSTALL_LANG\"}" > "$CONFIG_FILE"
 
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  ${MSG_COMPLETE}${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo ""
+echo -e "${GREEN}╔═══════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║            ${MSG_COMPLETE}                       ║${NC}"
+echo -e "${GREEN}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${CYAN}${MSG_RUN}${NC}"
 echo ""
-
-if [ "$INSTALL_LANG" = "es" ]; then
-    echo "Opciones: rp1 --voice para activar voz"
-    echo "         rp1 --setup para descargar modelos"
-else
-    echo "Options: rp1 --voice to enable voice"
-    echo "         rp1 --setup to download models"
+echo "Options:"
+echo "  rp1 --voice   Enable voice"
+if [ "$AI_MODE" = "local" ]; then
+    echo "  rp1 --setup   Download models"
 fi
-
-export PATH="$HOME/.local/bin:$PATH"
 echo ""
-echo "Source your shell config or restart terminal to use 'rp1' command"
